@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from .models import AccountBudget
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,3 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+class AccountBudgetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccountBudget
+        fields = ['budget'] 
