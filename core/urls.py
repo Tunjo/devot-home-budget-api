@@ -8,6 +8,7 @@ from drf_yasg.views import get_schema_view
 
 from rest_framework import permissions
 from drf_yasg import openapi
+from account.urls import account_urls
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -40,9 +41,19 @@ swagger_urls = [
     ),
 ]
 
+auth_urls = [
+    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
+
+api_urls = [
+    path('', include(auth_urls)),
+    path('', include(account_urls))
+]
+
 urlpatterns = [
     path('', include(swagger_urls)),
     path('admin/', admin.site.urls),
-    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/', include(api_urls))
+
 ]
