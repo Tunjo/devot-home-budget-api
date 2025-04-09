@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  kids_task_postgres:
+  home_budget_postgres:
     image: postgres:15-alpine
     container_name: home_budget_db
     environment:

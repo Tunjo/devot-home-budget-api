@@ -24,4 +24,4 @@ RUN ["chmod", "+x", "/usr/local/bin/entrypoint"]
 
 EXPOSE 8000
 
-ENTRYPOINT ["/usr/local/bin/entrypoint"]
+ENTRYPOINT /usr/local/bin/entrypoint
