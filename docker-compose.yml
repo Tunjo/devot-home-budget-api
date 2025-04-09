@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  kids_task_postgres:
+    image: postgres:15-alpine
+    container_name: home_budget_db
+    environment:
+      - POSTGRES_DB=home_budget
+      - POSTGRES_USER=home_budget
+      - POSTGRES_PASSWORD=task=pwd!devot
+    ports:
+      - "5432:5432"
+    volumes:
+      - home_budget_postgres:/var/lib/db
+    networks:
+      home_budget-drf-net:
+        aliases:
+          - home_budget_postgres
+  backend:
+    container_name: home_budget_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - backend.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/opt/backend
+    networks:
+      home_budget-drf-net:
+    depends_on:
+      - home_budget_postgres
+
+volumes:
+  home_budget_postgres:
+
+networks:
+  home_budget-drf-net:
