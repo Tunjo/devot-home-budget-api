@@ -14,7 +14,14 @@ schema_view = get_schema_view(
    openapi.Info(
       title="Devot-home-budget-API",
       default_version='v1',
-      description="Documentation for Devot-home-budget API",
+      description=(
+          "Documentation for Devot-home-budget API.\n\n"
+          "### Authentication\n"
+          "To authenticate, use the `/api/login/` endpoint to obtain an access token. "
+          "Include the token in the `Authorization` header for all authenticated requests:\n\n"
+          "`Authorization: Bearer <your_access_token>`\n\n"
+          "You can also refresh your token using the `/api/login/refresh/` endpoint."
+      ),
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="antun.franjin@gmail.com"),
       license=openapi.License(name="BSD License"),
