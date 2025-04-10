@@ -1,16 +1,13 @@
-from rest_framework.routers import DefaultRouter
 from .views import (
     RegisterView,
+    AccountBudgetViewSet
 )
 from django.urls import (
     path,
-    include
 )
 
 
-router = DefaultRouter()
-router.register(r'register', RegisterView, basename='register')
-
 account_urls = [
-    path('', include(router.urls))
+    path('register/', RegisterView.as_view({'post': 'create'}), name='register'),
+    path('budget/', AccountBudgetViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='account_budget'),
 ]
