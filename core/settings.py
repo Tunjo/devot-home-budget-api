@@ -62,7 +62,15 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Devot Home Budget API',
-    'DESCRIPTION': 'API documentation for the Devot Home Budget application.',
+    'DESCRIPTION': (
+        '## API documentation for the Devot Home Budget application.\n\n'
+        '### Authentication\n'
+        'To access most endpoints, you need to:\n'
+        '1. Log in using the `/api/login/` endpoint to obtain a JWT token.\n'
+        '2. Click the "Authorize" button in the top-right corner of this page.\n'
+        '3. Enter your token in the format: `<your_access_token>`.\n\n'
+        'Once authorized, you can access protected endpoints.'
+    ),
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SWAGGER_UI_SETTINGS': {
@@ -79,6 +87,14 @@ SPECTACULAR_SETTINGS = {
                 'bearerFormat': 'JWT',
             },
         },
+    },
+    'CONTACT': {
+        'name': 'Devot Home Budget Support',
+        'email': 'antun.franjin@gmail.com',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+        'url': 'https://opensource.org/licenses/MIT',
     },
 }
 
