@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     'account.apps.AccountConfig',
+    'category.apps.CategoryConfig',
 ]
 
 REST_FRAMEWORK = {
