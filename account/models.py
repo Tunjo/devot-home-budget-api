@@ -19,7 +19,7 @@ class AccountBudget(models.Model):
         return f"{self.user.username}'s Budget: {self.budget}"
 
 @receiver(post_save, sender=User)
-def create_account_budget(sender, instance, created, **kwargs):
+def create_account_budget(instance, created, **kwargs):
     if created:
         AccountBudget.objects.create(user=instance)
 

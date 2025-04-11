@@ -2,8 +2,9 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny
-from .serializers import UserSerializer, AccountBudgetSerializer
 
+from .contrib.unique_none import get_unique_or_none
+from .serializers import UserSerializer, AccountBudgetSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from .models import AccountBudget
@@ -27,11 +28,10 @@ class AccountBudgetViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet)
     permission_classes = [IsAuthenticated, IsOwner]
 
     def get_object(self):
-        try:
-            return AccountBudget.objects.get(user=self.request.user)
-        except AccountBudget.DoesNotExist:
-
+        budget = get_unique_or_none(AccountBudget, user=self.request.user)
+        if budget is None:
             raise NotFound(detail="AccountBudget not found.")
+        return budget
 
     @extend_schema(
         description="Retrieve the budget for the authenticated user.",
