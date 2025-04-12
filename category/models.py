@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import (
+    post_save,
+    post_delete,
+    pre_save
+)
 from django.dispatch import receiver
 from account.contrib.unique_none import get_unique_or_none
 from account.models import AccountBudget
@@ -28,6 +32,19 @@ class Expense(models.Model):
         return f'{self.amount} - {self.category.name}'
     
 
+
+@receiver(pre_save, sender=Expense)
+def cache_previous_expense_state(sender, instance, **kwargs):
+    """
+    Cache the previous state of the Expense object before it is updated.
+    """
+    if instance.pk:
+        try:
+            instance._previous_state = Expense.objects.get(pk=instance.pk)
+        except Expense.DoesNotExist:
+            instance._previous_state = None
+    
+
 @receiver(post_save, sender=Expense)
 def update_budget_on_save(instance, created, **kwargs):
     """
@@ -40,10 +57,11 @@ def update_budget_on_save(instance, created, **kwargs):
     if created:
         budget.budget -= instance.amount
     else:
-        previous_expense = get_unique_or_none(Expense, id=instance.id)
-        if previous_expense is None:
-            raise ValueError(f'Expense not found for id {instance.id}')
-        budget.budget += previous_expense.amount
+        previous_expense = getattr(instance, '_previous_state', None)
+        print(previous_expense)
+        if previous_expense:
+            print(f"Previous amount: {previous_expense.amount}")
+            budget.budget += previous_expense.amount
         budget.budget -= instance.amount
 
     budget.save()

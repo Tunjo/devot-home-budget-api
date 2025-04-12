@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         for category_name in PREDEFINED_CATEGORIES:
             category, created = Category.objects.get_or_create(name=category_name, user=None)
-            if created and not category:
+            if created:
                 self.stdout.write(self.style.SUCCESS(f'Created category: {category_name}'))
             else:
                 self.stdout.write(self.style.WARNING(f'Category already exists: {category_name}'))
