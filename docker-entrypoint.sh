@@ -12,5 +12,7 @@ echo "Running migrations"
 python3 manage.py migrate
 echo "Creating predefined categories..."
 python3 manage.py create_predefined_categories
+echo "Creating superuser..."
+python3 manage.py createsuperuser --noinput || echo "Superuser already exists."
 echo "Starting the server..."
 python3 manage.py runserver 0.0.0.0:8000
