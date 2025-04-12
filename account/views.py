@@ -1,15 +1,24 @@
 
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
-from rest_framework.permissions import AllowAny
-
-from .contrib.unique_none import get_unique_or_none
-from .serializers import UserSerializer, AccountBudgetSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.mixins import (
+    CreateModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin
+)
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated
+)
 from rest_framework.exceptions import NotFound
-from .models import AccountBudget
 from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema
+
+from .contrib.unique_none import get_unique_or_none
+from .serializers import (
+    UserSerializer,
+    AccountBudgetSerializer
+)
+from .models import AccountBudget
 from .permissions import IsOwner 
 
 class RegisterView(CreateModelMixin, GenericViewSet):
