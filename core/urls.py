@@ -1,12 +1,20 @@
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import (
+    include,
+    path
+)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView
+)
 
 from account.urls import account_urls
+from category.urls import category_urls
 
 spectacular_urls = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
@@ -23,7 +31,8 @@ auth_urls = [
 
 api_urls = [
     path('', include(auth_urls)),
-    path('', include(account_urls))
+    path('', include(account_urls)),
+    path('', include(category_urls))
 ]
 
 urlpatterns = [
