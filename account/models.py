@@ -12,7 +12,7 @@ class AccountBudget(models.Model):
     budget = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
-        default=500.00
+        default=1000.00
     )
 
     def __str__(self):
@@ -25,12 +25,13 @@ class BudgetHistory(models.Model):
         (INCOME, "Income"),
         (EXPENSE, "Expense"),
     ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="budget_history")
     change_type = models.CharField(max_length=10, choices=CHANGE_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True)
     description = models.TextField(blank=True, null=True)
+    expense = models.ForeignKey('category.Expense', on_delete=models.SET_NULL, null=True, blank=True, related_name="budget_history")
+    category = models.ForeignKey('category.Category', on_delete=models.SET_NULL, null=True, blank=True, related_name="budget_history")
 
     def __str__(self):
         return f"{self.user.username} - {self.change_type} - {self.amount} on {self.date}"
@@ -39,7 +40,14 @@ class BudgetHistory(models.Model):
 @receiver(post_save, sender=User)
 def create_account_budget(instance, created, **kwargs):
     if created:
-        AccountBudget.objects.create(user=instance)
+      account_budget = AccountBudget.objects.create(user=instance)
+
+      BudgetHistory.objects.create(
+          user=instance,
+          change_type=BudgetHistory.INCOME,
+          amount=account_budget.budget,
+          description="Initial budget allocation",
+      )
 
 
 
