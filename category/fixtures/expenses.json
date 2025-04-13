@@ -1,0 +1,233 @@
+[
+  {
+    "model": "category.expense",
+    "pk": 1,
+    "fields": {
+      "amount": 10,
+      "description": "Groceries shopping",
+      "date": "2025-04-01",
+      "category": 1,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 2,
+    "fields": {
+      "amount": 15,
+      "description": "Supermarket snacks",
+      "date": "2025-04-02",
+      "category": 1,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 3,
+    "fields": {
+      "amount": 8,
+      "description": "Vegetables and fruits",
+      "date": "2025-04-03",
+      "category": 1,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 4,
+    "fields": {
+      "amount": 5,
+      "description": "Bus ticket",
+      "date": "2025-04-04",
+      "category": 2,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 5,
+    "fields": {
+      "amount": 7,
+      "description": "Train ticket",
+      "date": "2025-04-05",
+      "category": 2,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 6,
+    "fields": {
+      "amount": 6,
+      "description": "Taxi ride",
+      "date": "2025-04-06",
+      "category": 2,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 7,
+    "fields": {
+      "amount": 20,
+      "description": "Monthly rent",
+      "date": "2025-04-07",
+      "category": 3,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 8,
+    "fields": {
+      "amount": 25,
+      "description": "Electricity bill",
+      "date": "2025-04-08",
+      "category": 3,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 9,
+    "fields": {
+      "amount": 18,
+      "description": "Water bill",
+      "date": "2025-04-09",
+      "category": 3,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 10,
+    "fields": {
+      "amount": 15,
+      "description": "Doctor visit",
+      "date": "2025-04-10",
+      "category": 4,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 11,
+    "fields": {
+      "amount": 12,
+      "description": "Pharmacy purchase",
+      "date": "2025-04-11",
+      "category": 4,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 12,
+    "fields": {
+      "amount": 10,
+      "description": "Health checkup",
+      "date": "2025-04-12",
+      "category": 4,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 13,
+    "fields": {
+      "amount": 8,
+      "description": "Movie night",
+      "date": "2025-04-13",
+      "category": 5,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 14,
+    "fields": {
+      "amount": 10,
+      "description": "Concert ticket",
+      "date": "2025-04-14",
+      "category": 5,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 15,
+    "fields": {
+      "amount": 9,
+      "description": "Streaming subscription",
+      "date": "2025-04-15",
+      "category": 5,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 16,
+    "fields": {
+      "amount": 12,
+      "description": "Weekend trip",
+      "date": "2025-04-16",
+      "category": 6,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 17,
+    "fields": {
+      "amount": 20,
+      "description": "Hotel stay",
+      "date": "2025-04-17",
+      "category": 6,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 18,
+    "fields": {
+      "amount": 15,
+      "description": "Travel snacks",
+      "date": "2025-04-18",
+      "category": 6,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 19,
+    "fields": {
+      "amount": 7,
+      "description": "Gym membership",
+      "date": "2025-04-19",
+      "category": 7,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 20,
+    "fields": {
+      "amount": 10,
+      "description": "Yoga class",
+      "date": "2025-04-20",
+      "category": 7,
+      "user": 2
+    }
+  },
+  {
+    "model": "category.expense",
+    "pk": 21,
+    "fields": {
+      "amount": 8,
+      "description": "Fitness equipment",
+      "date": "2025-04-21",
+      "category": 7,
+      "user": 2
+    }
+  }
+]

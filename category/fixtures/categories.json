@@ -1,0 +1,18 @@
+[
+  {
+    "model": "category.category",
+    "pk": 6,
+    "fields": {
+      "name": "Travel",
+      "user": 2
+    }
+  },
+  {
+    "model": "category.category",
+    "pk": 7,
+    "fields": {
+      "name": "Fitness",
+      "user": 2
+    }
+  }
+]
