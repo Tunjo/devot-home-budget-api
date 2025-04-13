@@ -8,7 +8,13 @@ from rest_framework.filters import (
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.functions import Lower
-from django.db.models import Q
+from django.db.models import (
+    Q,
+    Sum
+)
+from drf_spectacular.utils import (
+    extend_schema, extend_schema_view
+)
 
 from .models import (
     Category,
@@ -21,7 +27,37 @@ from .serializers import (
 from .filters import ExpenseFilter
 from .expense_pagination import ExpensePagination
 
-
+@extend_schema_view(
+    list=extend_schema(
+        description=(
+            'Retrieve a list of categories. This includes both user-specific categories '
+            'and predefined categories (shared across all users).'
+        ),
+        responses={200: CategorySerializer(many=True)},
+    ),
+    create=extend_schema(
+        description=(
+            'Create a new category. The `user` field is automatically set to the authenticated user.'
+        ),
+        request=CategorySerializer,
+        responses={201: CategorySerializer},
+    ),
+    update=extend_schema(
+        description=(
+            'Update an existing category. Predefined categories (shared across all users) '
+            'cannot be updated.'
+        ),
+        request=CategorySerializer,
+        responses={200: CategorySerializer},
+    ),
+    destroy=extend_schema(
+        description=(
+            'Delete an existing category. Predefined categories (shared across all users) '
+            'cannot be deleted.'
+        ),
+        responses={204: None},
+    ),
+)
 class CategoryViewSet(ModelViewSet):
     """
     ViewSet for managing categories (CRUD).
@@ -33,13 +69,14 @@ class CategoryViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Category.objects.filter(Q(user=self.request.user) | Q(user__isnull=True))
-
+    
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
     
     def update(self, request, *args, **kwargs):
         """
-        Prevent predefined categories (user=None) from being updated.
+        Update an existing category. Predefined categories (shared across all users)
+        cannot be updated.
         """
         category = self.get_object()
         if category.user is None:
@@ -51,7 +88,8 @@ class CategoryViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         """
-        Prevent predefined categories (user=None) from being deleted.
+        Delete an existing category. Predefined categories (shared across all users)
+        cannot be deleted.
         """
         category = self.get_object()
         if category.user is None:
@@ -62,6 +100,53 @@ class CategoryViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description=(
+            'Retrieve a list of expenses with the following options:\n\n'
+            '**Filters**:\n'
+            '- `min_price`: Filter by an amount greater than or equal to this value.\n'
+            '- `max_price`: Filter by an amount less than or equal to this value.\n'
+            '- `start_date`: Filter by a date greater than or equal to this value.\n'
+            '- `end_date`: Filter by a date less than or equal to this value.\n'
+            '- `date`: Filter by an exact date.\n'
+            '- `category`: Filter by category name (case-insensitive) or category ID.\n\n'
+            '**Search**:\n'
+            '- `search`: Search by description or category name.\n\n'
+            '**Ordering**:\n'
+            '- `ordering`: Order results by a field. Prefix with "-" for descending order. Available fields: `date`, `amount`, `category__name`.\n\n'
+            '**Pagination**:\n'
+            '- `page`: Page number for pagination.'
+        ),
+        responses={200: ExpenseSerializer(many=True)},
+    ),
+    create=extend_schema(
+        description=(
+            'Create a new expense. The `user` field is automatically set to the authenticated user.\n\n'
+            '**Request Body**:\n'
+            '- `amount` (required): The amount of the expense.\n'
+            '- `description` (optional): A description of the expense.\n'
+            '- `category` (required): The ID of the category associated with the expense.\n\n'
+            '**Response**:\n'
+            'Returns the created expense object with its details.'
+        ),
+        request=ExpenseSerializer,
+        responses={201: ExpenseSerializer},
+    ),
+    update=extend_schema(
+        description=(
+            'Update an existing expense. The `user` field cannot be modified.'
+        ),
+        request=ExpenseSerializer,
+        responses={200: ExpenseSerializer},
+    ),
+    destroy=extend_schema(
+        description=(
+            'Delete an existing expense.'
+        ),
+        responses={204: None},
+    ),
+)
 class ExpenseViewSet(ModelViewSet):
     """
     ViewSet for managing expenses with dynamic filtering, search, pagination,
@@ -98,20 +183,15 @@ class ExpenseViewSet(ModelViewSet):
         if not order_by:
             order_by = initial_order
 
-        # Check if the field is a string field (e.g., category__name)
         string_fields = ['category__name', 'description']
         if order_by.lstrip('-') in string_fields:
             if order_by.startswith('-'):
                 return qs.order_by(Lower(order_by[1:])).reverse()
             return qs.order_by(Lower(order_by))
 
-        # For non-string fields (e.g., date, amount), use direct ordering
         return qs.order_by(order_by)
 
     def list(self, request, *args, **kwargs):
-        """
-        Return a list of all expenses as a paginated response.
-        """
         try:
             queryset = self.get_ordered_queryset(
                 self.filter_queryset(self.get_queryset()),

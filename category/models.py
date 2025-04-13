@@ -7,7 +7,7 @@ from django.db.models.signals import (
 )
 from django.dispatch import receiver
 from account.contrib.unique_none import get_unique_or_none
-from account.models import AccountBudget
+from account.models import AccountBudget, BudgetHistory
 
 
 class Category(models.Model):
@@ -56,15 +56,44 @@ def update_budget_on_save(instance, created, **kwargs):
 
     if created:
         budget.budget -= instance.amount
+        budget.save()
+
+        BudgetHistory.objects.create(
+            user=instance.user,
+            change_type=BudgetHistory.EXPENSE,
+            amount=instance.amount,
+            description=f'Expense created: {instance.description}',
+            expense=instance,
+            category=instance.category
+        )
+
     else:
         previous_expense = getattr(instance, '_previous_state', None)
-        print(previous_expense)
         if previous_expense:
-            print(f"Previous amount: {previous_expense.amount}")
-            budget.budget += previous_expense.amount
-        budget.budget -= instance.amount
+            difference = previous_expense.amount - instance.amount
 
-    budget.save()
+            if difference > 0:
+                budget.budget += difference
+                BudgetHistory.objects.create(
+                    user=instance.user,
+                    change_type=BudgetHistory.INCOME,
+                    amount=difference,
+                    description=f'Expense updated (difference treated as income): {instance.description}',
+                    expense=instance,
+                    category=instance.category
+                )
+            elif difference < 0:
+                budget.budget += difference
+                BudgetHistory.objects.create(
+                    user=instance.user,
+                    change_type=BudgetHistory.EXPENSE,
+                    amount=abs(difference),
+                    description=f'Expense updated (additional expense): {instance.description}',
+                    expense=instance,
+                    category=instance.category
+                )
+
+        budget.save()
 
 @receiver(post_delete, sender=Expense)
 def update_budget_on_delete(instance, **kwargs):
@@ -76,3 +105,12 @@ def update_budget_on_delete(instance, **kwargs):
         raise ValueError(f'AccountBudget not found for user {instance.user}')
     budget.budget += instance.amount
     budget.save()
+
+    BudgetHistory.objects.create(
+        user=instance.user,
+        change_type=BudgetHistory.INCOME,
+        amount=instance.amount,
+        description=f'Expense deleted: {instance.description}',
+        expense=instance,
+        category=instance.category
+    )
