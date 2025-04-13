@@ -19,6 +19,8 @@ RUN pip3 install -r /tmp/requirements.txt
 
 RUN apk del gcc musl-dev libffi-dev python3-dev build-base
 
+COPY hash_fixture_passwords.py /opt/backend/
+
 COPY ./docker-entrypoint.sh /usr/local/bin/entrypoint
 RUN ["chmod", "+x", "/usr/local/bin/entrypoint"]
 
