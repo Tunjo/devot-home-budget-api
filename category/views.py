@@ -5,16 +5,21 @@ from rest_framework.filters import (
     SearchFilter,
     OrderingFilter
 )
+from rest_framework.views import APIView
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.functions import Lower
 from django.db.models import (
     Q,
-    Sum
+    Sum,
+    Avg
 )
 from drf_spectacular.utils import (
-    extend_schema, extend_schema_view
+    extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 )
+from drf_spectacular.types import OpenApiTypes
+
+from account.models import BudgetHistory
 
 from .models import (
     Category,
@@ -26,38 +31,11 @@ from .serializers import (
 )
 from .filters import ExpenseFilter
 from .expense_pagination import ExpensePagination
+from .schemas.aggregation_schemas import aggregation_schema
+from .schemas.categories_schemas import categories_schemas
+from .schemas.expense_schemas import expense_schema
 
-@extend_schema_view(
-    list=extend_schema(
-        description=(
-            'Retrieve a list of categories. This includes both user-specific categories '
-            'and predefined categories (shared across all users).'
-        ),
-        responses={200: CategorySerializer(many=True)},
-    ),
-    create=extend_schema(
-        description=(
-            'Create a new category. The `user` field is automatically set to the authenticated user.'
-        ),
-        request=CategorySerializer,
-        responses={201: CategorySerializer},
-    ),
-    update=extend_schema(
-        description=(
-            'Update an existing category. Predefined categories (shared across all users) '
-            'cannot be updated.'
-        ),
-        request=CategorySerializer,
-        responses={200: CategorySerializer},
-    ),
-    destroy=extend_schema(
-        description=(
-            'Delete an existing category. Predefined categories (shared across all users) '
-            'cannot be deleted.'
-        ),
-        responses={204: None},
-    ),
-)
+@categories_schemas
 class CategoryViewSet(ModelViewSet):
     """
     ViewSet for managing categories (CRUD).
@@ -100,53 +78,7 @@ class CategoryViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-@extend_schema_view(
-    list=extend_schema(
-        description=(
-            'Retrieve a list of expenses with the following options:\n\n'
-            '**Filters**:\n'
-            '- `min_price`: Filter by an amount greater than or equal to this value.\n'
-            '- `max_price`: Filter by an amount less than or equal to this value.\n'
-            '- `start_date`: Filter by a date greater than or equal to this value.\n'
-            '- `end_date`: Filter by a date less than or equal to this value.\n'
-            '- `date`: Filter by an exact date.\n'
-            '- `category`: Filter by category name (case-insensitive) or category ID.\n\n'
-            '**Search**:\n'
-            '- `search`: Search by description or category name.\n\n'
-            '**Ordering**:\n'
-            '- `ordering`: Order results by a field. Prefix with "-" for descending order. Available fields: `date`, `amount`, `category__name`.\n\n'
-            '**Pagination**:\n'
-            '- `page`: Page number for pagination.'
-        ),
-        responses={200: ExpenseSerializer(many=True)},
-    ),
-    create=extend_schema(
-        description=(
-            'Create a new expense. The `user` field is automatically set to the authenticated user.\n\n'
-            '**Request Body**:\n'
-            '- `amount` (required): The amount of the expense.\n'
-            '- `description` (optional): A description of the expense.\n'
-            '- `category` (required): The ID of the category associated with the expense.\n\n'
-            '**Response**:\n'
-            'Returns the created expense object with its details.'
-        ),
-        request=ExpenseSerializer,
-        responses={201: ExpenseSerializer},
-    ),
-    update=extend_schema(
-        description=(
-            'Update an existing expense. The `user` field cannot be modified.'
-        ),
-        request=ExpenseSerializer,
-        responses={200: ExpenseSerializer},
-    ),
-    destroy=extend_schema(
-        description=(
-            'Delete an existing expense.'
-        ),
-        responses={204: None},
-    ),
-)
+@expense_schema
 class ExpenseViewSet(ModelViewSet):
     """
     ViewSet for managing expenses with dynamic filtering, search, pagination,
@@ -209,4 +141,93 @@ class ExpenseViewSet(ModelViewSet):
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
-            )     
+            )
+
+@aggregation_schema
+class AggregationView(APIView):
+    """
+    API View for dynamic aggregations based on query parameters.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+        date = request.query_params.get('date')
+        categories = request.query_params.get('categories')
+        agg_type = request.query_params.get('type')
+
+        if categories:
+            try:
+                categories = list(map(int, categories.split(',')))
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid category IDs. Must be integers.'},
+                    status=400
+                )
+
+        filters = Q(user=request.user)
+        if year:
+            filters &= Q(date__year=year)
+        if month:
+            filters &= Q(date__month=month)
+        if date:
+            filters &= Q(date=date)
+        if categories:
+            filters &= Q(category_id__in=categories)
+
+        if agg_type == 'total':
+            return self.get_total(filters)
+        elif agg_type == 'categories':
+            return self.get_expenses_by_categories(filters)
+        elif agg_type == 'average':
+            return self.get_average_expenses(filters)
+        else:
+            return Response(
+                {'error': 'Invalid type parameter. Use "total", "categories", or "average".'},
+                status=400
+            )
+
+    def get_total(self, filters):
+        """
+        Calculate total earned and spent.
+        """
+        budget_filters = filters & ~Q(category_id__in=[])
+        earnings = BudgetHistory.objects.filter(budget_filters).aggregate(
+            total_earned=Sum('amount', filter=Q(change_type='income')),
+            total_spent=Sum('amount', filter=Q(change_type='expense'))
+        )
+
+        total_earnings = (earnings['total_earned'] or 0) - (earnings['total_spent'] or 0)
+        if total_earnings < 0:
+            total_earnings = 0
+        return Response({
+            'total_earned': earnings['total_earned'] or 0,
+            'total_spent': earnings['total_spent'] or 0,
+            'net_earnings': total_earnings
+        })
+
+    def get_expenses_by_categories(self, filters):
+        """
+        Calculate expenses grouped by categories.
+        """
+        expenses_by_category = Expense.objects.filter(filters).values('category__name').annotate(
+            total_expenses=Sum('amount')
+        ).order_by('-total_expenses')
+
+        return Response({
+            'expenses_by_category': list(expenses_by_category)
+        })
+
+    def get_average_expenses(self, filters):
+        """
+        Calculate average expenses, optionally filtered by categories.
+        """
+
+        average_expenses = Expense.objects.filter(filters).values('category__name').annotate(
+            average_expense=Avg('amount')
+        ).order_by('-average_expense')
+
+        return Response({
+            'average_expenses': list(average_expenses)
+        })
