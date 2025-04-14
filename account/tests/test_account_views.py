@@ -2,7 +2,6 @@ import pytest
 from account.views import AccountBudgetViewSet, RegisterView
 from account.models import BudgetHistory
 from rest_framework.test import force_authenticate
-from .conftest import api_request_factory, user, account_budget
 
 
 @pytest.mark.django_db
@@ -58,7 +57,6 @@ def test_account_budget_update(api_request_factory, user, account_budget):
     account_budget.refresh_from_db()
     assert account_budget.budget == 1200.00
 
-    # Check that a BudgetHistory entry was created
     budget_history = BudgetHistory.objects.filter(user=user).last()
     assert budget_history is not None
     assert budget_history.change_type == BudgetHistory.INCOME

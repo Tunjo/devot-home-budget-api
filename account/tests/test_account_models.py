@@ -1,5 +1,4 @@
 import pytest
-from .conftest import user
 from account.models import (
     AccountBudget,
     BudgetHistory
