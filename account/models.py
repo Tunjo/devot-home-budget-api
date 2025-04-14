@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 class AccountBudget(models.Model):
     user = models.OneToOneField(
@@ -28,7 +29,7 @@ class BudgetHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="budget_history")
     change_type = models.CharField(max_length=10, choices=CHANGE_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
     description = models.TextField(blank=True, null=True)
     expense = models.ForeignKey('category.Expense', on_delete=models.SET_NULL, null=True, blank=True, related_name="budget_history")
     category = models.ForeignKey('category.Category', on_delete=models.SET_NULL, null=True, blank=True, related_name="budget_history")

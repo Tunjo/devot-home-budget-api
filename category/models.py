@@ -62,6 +62,7 @@ def update_budget_on_save(instance, created, **kwargs):
             user=instance.user,
             change_type=BudgetHistory.EXPENSE,
             amount=instance.amount,
+            date=instance.date,
             description=f'Expense created: {instance.description}',
             expense=instance,
             category=instance.category
@@ -78,6 +79,7 @@ def update_budget_on_save(instance, created, **kwargs):
                     user=instance.user,
                     change_type=BudgetHistory.INCOME,
                     amount=difference,
+                    date=instance.date,
                     description=f'Expense updated (difference treated as income): {instance.description}',
                     expense=instance,
                     category=instance.category
@@ -87,6 +89,7 @@ def update_budget_on_save(instance, created, **kwargs):
                 BudgetHistory.objects.create(
                     user=instance.user,
                     change_type=BudgetHistory.EXPENSE,
+                    date=instance.date,
                     amount=abs(difference),
                     description=f'Expense updated (additional expense): {instance.description}',
                     expense=instance,
@@ -110,6 +113,7 @@ def update_budget_on_delete(instance, **kwargs):
         user=instance.user,
         change_type=BudgetHistory.INCOME,
         amount=instance.amount,
+        date=instance.date,
         description=f'Expense deleted: {instance.description}',
         expense=instance,
         category=instance.category
