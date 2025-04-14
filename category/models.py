@@ -115,6 +115,4 @@ def update_budget_on_delete(instance, **kwargs):
         amount=instance.amount,
         date=instance.date,
         description=f'Expense deleted: {instance.description}',
-        expense=instance,
-        category=instance.category
     )

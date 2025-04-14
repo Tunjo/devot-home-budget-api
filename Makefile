@@ -28,4 +28,8 @@ load-data:
 	@echo "All data loaded successfully!"
 
 backend-tests:
-	docker exec -it  home_budget_backend pytest
+	@echo "Cleaning up old __pycache__ and .pyc files..."
+	docker exec -it home_budget_backend sh -c "find . -name '__pycache__' -exec rm -rf {} +"
+	docker exec -it home_budget_backend sh -c "find . -name '*.pyc' -exec rm -f {} +"
+	@echo "Running tests..."
+	docker exec -it home_budget_backend pytest --cache-clear -s
