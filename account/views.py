@@ -11,7 +11,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from rest_framework import status
 from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema
@@ -79,7 +79,7 @@ class AccountBudgetViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet)
 
         try:
             budget_increase = Decimal(budget_increase)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, InvalidOperation):
             return Response({'error': "Invalid value for 'budget_increase'. It must be a number."}, status=status.HTTP_400_BAD_REQUEST)
 
         if budget_increase <= 0:
