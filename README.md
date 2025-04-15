@@ -36,7 +36,7 @@ A backend application for managing personal finances. It provides RESTful endpoi
 ### **Load Test Data**
 
 Run the following command to quickly set up additional data for the application:  
-`make run-data`
+`make load-data`
 
 This command will:
 
@@ -66,5 +66,5 @@ This command will:
 ### **Summary**
 
 - Use `make run-dev` to start the project, create a superuser, and load predefined categories.
-- Use `make run-data` to add additional test data, including a test user and sample expenses.
+- Use `make load-data` to add additional test data, including a test user and sample expenses.
 - Use `make backend-tests` to run the test suite and verify the application.
